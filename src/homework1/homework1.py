@@ -1,6 +1,6 @@
 import logistic_regression as lr
 import numpy as np
-import matplotlib as plt
+from logistic_regression import logistic_regression_GD
 
 fileX = 'logistic_x.txt'
 fileY = 'logistic_y.txt'
@@ -14,15 +14,17 @@ def load_data(fileX, fileY):
     # Pack the intercept coordinates into X so we can calculate the 
     # intercept for the logistic regression.
     X = np.concatenate([ones, Xsplit[0], Xsplit[1]], axis=1)
-
     return (X, y)
 
 
 def regression(epsilon=lr.EPSILON, max_iters=lr.MAX_ITERS):
     X, y = load_data(fileX, fileY)
-
     return lr.logistic_regression(X, y, epsilon, max_iters)
 
+
+def regression_GD(epsilon=lr.EPSILON, max_iters=lr.MAX_ITERS):
+    X, y = load_data(fileX, fileY)
+    return lr.logistic_regression_GD(X, y, epsilon, max_iters)
 
 def main():
     theta, cost = regression()
@@ -33,4 +35,5 @@ def main():
 
 if __name__ == '__main__':
     regression()
+    # regression_GD()
     main()

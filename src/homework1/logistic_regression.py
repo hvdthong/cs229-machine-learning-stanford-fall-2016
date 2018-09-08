@@ -51,3 +51,18 @@ def logistic_regression(X, y, epsilon, max_iters):
         theta = theta - Hinv.dot(grad)
 
     return (theta, cost)
+
+
+def logistic_regression_GD(X, y, epsilon, max_iters):
+    mm = X.shape[0]
+    nn = X.shape[1]
+
+    # The cost of the ith iteration of gradient descent
+    cost = np.zeros(max_iters)
+    theta = np.zeros(nn)
+
+    for i in range(0, max_iters):
+        cost[i] = J(theta, X, y)
+        grad = gradJ(theta, X, y)
+        theta -= grad
+    return theta, cost
