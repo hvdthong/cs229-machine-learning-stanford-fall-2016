@@ -4,7 +4,7 @@ import numpy.linalg as lin
 
 def weight(tau):
     def go(Xtrain_i):
-        return lambda x: np.exp(-((x - Xtrain_i).T.dot(x - Xtrain_i))/(2*tau**2))
+        return lambda x: np.exp(-((x - Xtrain_i).T.dot(x - Xtrain_i)) / (2 * tau ** 2))
 
     return lambda Xtrain_i: go(Xtrain_i)
 

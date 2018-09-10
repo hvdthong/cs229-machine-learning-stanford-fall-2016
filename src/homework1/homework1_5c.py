@@ -1,11 +1,10 @@
 import numpy as np
 import homework1_5b as hm1b
 
-
 TRAINING_DATA = 'quasar_train.csv'
-TESTING_DATA  = 'quasar_test.csv'
+TESTING_DATA = 'quasar_test.csv'
 RIGHT_FREQ = 1300
-LEFT_FREQ  = 1200
+LEFT_FREQ = 1200
 
 
 def load_csv(file):
@@ -15,17 +14,18 @@ def load_csv(file):
 def load_data(training_data_file=TRAINING_DATA, testing_data_file=TESTING_DATA):
     data_training = load_csv(training_data_file)
     data_testing = load_csv(testing_data_file)
-    
+
     features_training = data_training[0]
     features_testing = data_testing[0]
-    
-    assert(np.array_equal(features_training, features_testing))
-    
+
+    assert (np.array_equal(features_training, features_testing))
+
     features = features_training
     data_set_tr = data_training[1:]
     data_set_te = data_testing[1:]
-    
+
     return features, data_set_tr, data_set_te
+
 
 def estimate(tau, features, training):
     w_tau = hm1b.weightM(tau)
@@ -36,8 +36,9 @@ def estimates(taus, features, training):
     models = {}
     for tau in taus:
         models[tau] = estimate(tau, features, training)
-        
+
     return models
+
 
 def join_intercept(mat):
     ones = np.ones(((len(mat), 1)))
@@ -50,6 +51,7 @@ class SpectrumModel():
     The SpectrumModel type packs the smooths of each training example in a data set
     of light spectra together so the entire model can be evaluated conveniently.
     """
+
     def __init__(self, data_set, features, weight_matrix):
         self._data_set = data_set
         self._features = join_intercept(features.reshape(len(features), 1))
@@ -82,8 +84,8 @@ class SpectrumModel():
             results[i] = self._spectrums[i](x)
 
         return results
- 
-    @property 
+
+    @property
     def spectrums(self):
         return self._spectrums
 
@@ -95,38 +97,41 @@ def d(f1, f2, z):
     diff = f1(z) - f2(z)
     return diff.T.dot(diff)
 
+
 def d_evaled(fs, f):
     try:
         rows = len(fs)
     except:
         rows = 1
-    
+
     v = np.zeros(len(fs))
     for i in range(rows):
         diff = fs[i] - f
         v[i] = diff.T.dot(diff)
-    
+
     return v
 
-ker = np.vectorize(lambda t: max(1-t, 0))
+
+ker = np.vectorize(lambda t: max(1 - t, 0))
+
 
 def right(f, features):
     r = np.where(features == RIGHT_FREQ)
-    assert(r)
-    return f[:,r[0][0]:]
+    assert (r)
+    return f[:, r[0][0]:]
 
-    
+
 def left(f, features):
     l = np.where(features == LEFT_FREQ)
-    assert(l)
-    return f[:,:l[0][0]]
+    assert (l)
+    return f[:, :l[0][0]]
 
 
 def h(gs, f, features):
     v = np.zeros(len(gs))
     for i in range(len(gs)):
         v[i] = d(gs[i], f, features)
-        
+
     return np.max(v)
 
 
@@ -135,14 +140,15 @@ def h_evaled(gs, f):
     return np.max(v)
 
 
-def neighbk(k, fs, f_right):    
-    assert(k <= len(fs))
+def neighbk(k, fs, f_right):
+    assert (k <= len(fs))
     costs = d_evaled(fs, f_right)
     # Get the indices of the k lowest cost functions by index.
     k_indices = costs.argsort()[:k]
-        
-    #return fs[k_indices]
+
+    # return fs[k_indices]
     return k_indices
+
 
 def neighbk_vecs(k, fs, f_right):
     return fs[neighbk(k, fs, f_right)]
@@ -160,18 +166,19 @@ class SpectrumEstimator():
         # The shape of m_eval_left will be smaller because we are evaluating 
         # on a subset of the data set.
         self.series_coef_indices = neighbk(3, self.m_eval_right, self.f_right)
-        
+
     def evaluate(self, x):
         ker_coefs = self.ker_coefs[self.series_coef_indices]
         f_lefts = left(self.m(x), self.features)[self.series_coef_indices]
         return np.sum((ker_coefs * f_lefts.T).T, axis=0) / self.ker_sum
-        
+
     def __call__(self, x):
         return self.evaluate(x)
 
 
 def estimate_errors(m_eval_left, f_left, features):
     return d_evaled(m_eval_left, f_left(features))
+
 
 def average_errors(m_eval_left, f_left, features):
     return np.average(estimate_errors(m_eval_left, f_left, features))
