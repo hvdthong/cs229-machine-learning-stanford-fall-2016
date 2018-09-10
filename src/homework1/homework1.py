@@ -26,6 +26,7 @@ def regression_GD(epsilon=lr.EPSILON, max_iters=lr.MAX_ITERS):
     X, y = load_data(fileX, fileY)
     return lr.logistic_regression_GD(X, y, epsilon, max_iters)
 
+
 def main():
     theta, cost = regression()
 
