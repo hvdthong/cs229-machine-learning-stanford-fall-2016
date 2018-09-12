@@ -182,3 +182,42 @@ def estimate_errors(m_eval_left, f_left, features):
 
 def average_errors(m_eval_left, f_left, features):
     return np.average(estimate_errors(m_eval_left, f_left, features))
+
+
+def f_left_estimators(m_eval_right, features):
+    f_left = {}
+    for i in range(len(m_eval_right)):
+        f_left[i] = SpectrumEstimator(mtr, mtr_eval_right, m_eval_right[i], features)
+
+    return f_left
+
+
+def f_left_estimator_evals(f_left_ests, features):
+    rows = len(f_left_ests)
+    cols = features.shape[0]
+    v = np.array((rows, cols))
+    for i in range(features.shape[0]):
+        v[i] = f_left_ests[i](features)
+
+    return v
+
+
+if __name__ == '__main__':
+    tau = 5
+    features, training, testing = load_data()
+    mtr = estimate(tau, features, training)
+    mte = estimate(tau, features, testing)
+    print features.shape, training.shape, testing.shape
+
+    mtr_eval = mtr(features)
+    mtr_eval_right = right(mtr_eval, features)
+    mtr_eval_left = left(mtr_eval, features)
+    print mtr_eval_right.shape, mtr_eval_left.shape
+
+    # Problem 1.5.c.i
+    left_features = features[:np.where(features == 1200)[0][0]]
+    f_left_ests_tr = f_left_estimators(mtr_eval_right, features)
+    f_left_evals = f_left_estimator_evals(f_left_ests_tr, features)
+    errors_tr = estimate_errors(mtr_eval_left, f_left_evals)
+    avg_tr = np.average(errors_tr)
+    print('average training error = {}'.format(avg_tr))
